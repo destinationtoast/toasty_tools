@@ -1,0 +1,105 @@
+AO3 TOOLS README
+
+This is an initial rough attempt to document the AO3 data scraping scripts.  
+
+First, a couple big warnings/caveats: 
+
+I was learning about Python, JSON, and AO3 searches as I wrote all
+this.  I'm sure a lot of it is suboptimal or doesn't make sense, and I
+changed course a number of times mid-project as I learned new things.
+I definitely have been wanting to rewrite and refactor more sensibly,
+and suggestions are welcome.
+
+Past Me was abysmal at documenting this work as I went (sigh... you'd
+think I'd have learned by now).  Some of these files are probably
+deprecated or not working right, and they're certainly confusing even
+to Present Me.  Sorry.
+
+
+OVERVIEW
+
+*** The process:
+
+(1) AO3 search parameters are formulated as JSON objects, specifying
+search parameters and values.
+
+(2) JSON queries are converted to search URLs.
+
+(3) The HTML is parsed and the important data (e.g., number of search
+results, top 10 tags, etc.)
+
+(4) The results are output in a CSV file.
+
+optional step (O): For my huge snapshot of all the AO3 fandoms, I also
+wrote some scripts to scrape all the fandom names off of AO3 and turn
+those into JSON search objects.
+
+
+*** Types of AO3 searches:
+
+There are two types of AO3 searches, with different URL formats:
+
+(1) Tag-based search is the kind that shows the Sort and Filter
+sidebar on AO3. (e.g.:
+http://archiveofourown.org/tags/Sherlock%20(TV)/works) It gives you
+the number of results for the tag (and any additional filtering you've
+done) and lets you sort and filter the results, and gives you the
+breakdowns of the ratings, relationships, top 10 tags, etc.
+
+(2) General search is the kind that you get to from the AO3 Works
+Search page (http://archiveofourown.org/works/search).  This allows
+you to do things like search for results from a particular time slice,
+but not sort and filter the results.  (I think, anyway.  It may be
+possible?)
+
+For maximal confusion, I have scripts that formulate different sorts
+of URLs, but didn't document the differences well.  ;P
+
+THE FILES
+
+*** Creating a list of fandom names:
+
+makeFandomList.py grabs the fandom names off of AO3.
+
+FindMissingFandoms.py was used later to detect the fandoms that I
+didn't successfully get results from.
+
+
+*** Creating/converting JSON search objects:
+
+makeSearchesForAllFandoms.py takes in a list of fandom names and
+creates a JSON file that contains tag-based search objects for each
+fandom.  These are intended for the Tag-based search type described
+above -- using these JSON files as input for an AO3 search will return
+the number of results in the fandom plus all the top 10 breakdowns
+from the Sort and Filter sidebar.  JSON/exampleTagBasedSearch.json is an example.
+
+makeTagTimeSearches.py creates a JSON file that searches for the
+number of works in a given tag over a series of months.  (e.g., number
+of "Sherlock (TV)" tag uses one month ago, two months ago, etc).
+There are some examples of this sort of JSON/fixit.json is an example
+of this..  (I'm pretty sure makeTimeSearches.py is a deprecated
+version and makeTagTimeSearchesFlex.py was the beginning of an attempt
+to make the original process more flexible -- e.g., allowing searches
+by week or year as well as month -- but this needs to be confirmed))
+
+*** Doing the searches:
+
+I had thought that the relevant files were doSearches.py (for
+Tag-based searches) and doUnsortedSearches.py (for General searches).
+I think all the other files needed are called by those two.  However,
+doSearches.py seems to be broken and I need to investigate further.
+But I'm pretty sure most of the rest of the files are just helper
+files called by these two.
+
+
+KNOWN ISSUES
+
+Everything is very ad hoc and only accomodates a few specific use
+cases. Needs to be generalized and made consistent.
+
+Unicode searches aren't working right; I can't seem to get special
+characters to convert properly for the purposes of the search URL.
+
+These scripts are incredibly brittle if AO3 changes anything about
+their search results format.
